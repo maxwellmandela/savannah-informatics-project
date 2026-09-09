@@ -67,7 +67,7 @@ A pull request cannot be merged when any required check fails. Vercel automatica
 
 ## AI Use
 
-- **Section 1:** I used GitHub Copilot to pressure-test my initial design and compare TanStack Query with Redux. I chose TanStack Query because this project has mostly server state and does not need complex client-side state management. I made the final design and decision-log choices myself.
+- **Section 1:** I used GitHub Copilot to sanity -test my initial design and compare TanStack Query with Redux. I chose TanStack Query because this project has mostly server state and does not need complex client-side state management. I made the final design and decision-log choices myself.
 
 - **Section 2:** I used GitHub Copilot for Vite scaffolding, repetitive React and TypeScript code, authentication, token refresh, routing, stock filtering, search, pagination, product detail and stock updates. I reviewed and tested the generated code, including fixing a type-only import error and ensuring product requests also use the refresh path.
 

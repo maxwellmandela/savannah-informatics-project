@@ -57,7 +57,11 @@ function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (user) {
-    return <Navigate to="/items" replace />
+    const state = location.state as LoginLocationState | null
+    const from = state?.from?.pathname ?? '/items'
+    const search = state?.from?.search ?? ''
+
+    return <Navigate to={`${from}${search}`} replace />
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
