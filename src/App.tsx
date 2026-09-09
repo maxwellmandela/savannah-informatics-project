@@ -34,6 +34,7 @@ function App() {
       </header>
       <main className="app-main">
         <Routes>
+          <Route path="/" element={<Navigate to="/items" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/items" element={<StockListPage />} />
