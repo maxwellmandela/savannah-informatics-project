@@ -23,15 +23,6 @@ type LoginLocationState = {
 function App() {
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <Link className="brand" to="/items">
-          Clinic Stock
-        </Link>
-        <nav aria-label="Main navigation">
-          <Link to="/items">Stock</Link>
-          <Link to="/login">Sign in</Link>
-        </nav>
-      </header>
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Navigate to="/items" replace />} />

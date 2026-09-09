@@ -8,10 +8,10 @@ const defaultSort = 'title'
 const defaultOrder = 'asc'
 
 export function StockListPage() {
-  const { user, logout, checkSession } = useAuth()
+  const { user, logout } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchInput, setSearchInput] = useState(searchParams.get('q') ?? '')
-  const [sessionMessage, setSessionMessage] = useState('')
+  const [sessionMessage] = useState('')
   const query = searchParams.get('q') ?? ''
   const category = searchParams.get('category') ?? ''
   const sortBy = searchParams.get('sortBy') ?? defaultSort
@@ -56,19 +56,6 @@ export function StockListPage() {
     setSearchParams(nextParams)
   }
 
-  async function handleSessionCheck() {
-    setSessionMessage('Checking session...')
-
-    try {
-      await checkSession()
-      setSessionMessage('Session is valid.')
-    } catch (error) {
-      setSessionMessage(
-        error instanceof Error ? error.message : 'Session check failed.',
-      )
-    }
-  }
-
   const totalPages = productsQuery.data
     ? Math.ceil(productsQuery.data.total / PAGE_SIZE)
     : 0
@@ -77,14 +64,11 @@ export function StockListPage() {
     <section>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Stock catalogue</p>
+          {/* <p className="eyebrow">Stock catalogue</p> */}
           <h1>Clinic stock</h1>
           <p>Signed in as {user?.firstName}.</p>
         </div>
         <div className="actions">
-          <button type="button" onClick={handleSessionCheck}>
-            Check session
-          </button>
           <button type="button" onClick={logout}>
             Sign out
           </button>
