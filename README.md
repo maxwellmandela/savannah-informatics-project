@@ -50,14 +50,20 @@ npm run dev
 
 ## Deployment and CI/CD
 
-The application is deployed on Vercel from the `master` branch.
+The application is deployed on Vercel.
 
-GitHub Actions runs formatting checks, ESLint, unit tests and the production
-build on every pull request. Commitlint also checks every commit in the pull
-request. Failed checks block merging. Husky runs the same Conventional Commit
-check locally at the `commit-msg` stage.
+- **Production URL:** https://savannah-informatics-project.vercel.app/
+- **Deployment branch:** `main`
 
-Vercel automatically deploys the latest commit after it is merged into `master`.
+GitHub Actions runs on every pull request and checks:
+
+- Prettier formatting
+- ESLint
+- Commitlint
+- Unit tests
+- Production build
+
+A pull request cannot be merged when any required check fails. Vercel automatically deploys the latest commit after it is merged into `master`.
 
 ## AI Use
 
