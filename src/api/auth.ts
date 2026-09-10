@@ -171,7 +171,7 @@ export async function authenticatedFetch(
       'We could not reach the stock service. Check your connection and try again.',
       {
         cause: error,
-      }
+      },
     )
   }
 
