@@ -49,7 +49,7 @@ npm install
 npm run dev
 ```
 
-The API base URL is configured through `VITE_API_URL`, and `VITE_REQUEST_TIMEOUT_MS` controls how long API requests can remain pending before showing a connection error. Copy `.env.example` to `.env` for local development and update these values when needed.
+The API base URL is configured through `VITE_API_URL`, and `VITE_REQUEST_TIMEOUT_MS` controls how long API requests can remain pending before showing a connection error. Copy `.env.example` to `.env` for local development and update these values when needed. If `VITE_API_URL` is not provided, the app uses the public DummyJSON URL by default.
 
 ## Deployment and CI/CD
 
