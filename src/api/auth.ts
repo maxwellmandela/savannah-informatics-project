@@ -1,4 +1,44 @@
-const API_URL = 'https://dummyjson.com'
+const API_URL = import.meta.env.VITE_API_URL
+const REQUEST_TIMEOUT_MS = Number(import.meta.env.VITE_REQUEST_TIMEOUT_MS) || 10_000
+
+class RequestTimeoutError extends Error {
+  constructor() {
+    super('The request took too long. Check your connection and try again.')
+    this.name = 'RequestTimeoutError'
+  }
+}
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+): Promise<Response> {
+  const controller = new AbortController()
+  const timeout = globalThis.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  const signal = options.signal
+
+  function abortRequest() {
+    controller.abort()
+  }
+
+  if (signal?.aborted) {
+    controller.abort()
+  } else {
+    signal?.addEventListener('abort', abortRequest, { once: true })
+  }
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal })
+  } catch (error) {
+    if (controller.signal.aborted && !signal?.aborted) {
+      throw new RequestTimeoutError()
+    }
+
+    throw error
+  } finally {
+    globalThis.clearTimeout(timeout)
+    signal?.removeEventListener('abort', abortRequest)
+  }
+}
 
 export type AuthUser = {
   id: number
@@ -35,11 +75,28 @@ export async function loginUser(
   username: string,
   password: string,
 ): Promise<{ user: AuthUser; session: StoredSession }> {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password, expiresInMins: 1 }),
-  })
+  let response: Response
+
+  try {
+    response = await fetchWithTimeout(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, expiresInMins: 1 }),
+    })
+  } catch (error) {
+    if (error instanceof RequestTimeoutError) {
+      throw new Error('Sign-in took too long. Check your connection and try again.', {
+        cause: error,
+      })
+    }
+
+    throw new Error(
+      'We could not reach the sign-in service. Check your connection and try again.',
+      {
+        cause: error,
+      },
+    )
+  }
 
   if (!response.ok) {
     throw new Error('We could not sign you in. Check your username and password.')
@@ -55,7 +112,7 @@ export async function loginUser(
 }
 
 export async function getCurrentUser(accessToken: string): Promise<AuthUser> {
-  const response = await fetch(`${API_URL}/auth/me`, {
+  const response = await fetchWithTimeout(`${API_URL}/auth/me`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
 
@@ -67,7 +124,7 @@ export async function getCurrentUser(accessToken: string): Promise<AuthUser> {
 }
 
 export async function refreshSession(refreshToken: string): Promise<StoredSession> {
-  const response = await fetch(`${API_URL}/auth/refresh`, {
+  const response = await fetchWithTimeout(`${API_URL}/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken, expiresInMins: 1 }),
@@ -91,13 +148,32 @@ export async function authenticatedFetch(
     throw new AuthError('Your session is no longer valid.', 401)
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      ...options.headers,
-      Authorization: `Bearer ${session.accessToken}`,
-    },
-  })
+  let response: Response
+
+  try {
+    response = await fetchWithTimeout(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    })
+  } catch (error) {
+    if (options.signal?.aborted) {
+      throw error
+    }
+
+    if (error instanceof RequestTimeoutError) {
+      throw error
+    }
+
+    throw new Error(
+      'We could not reach the stock service. Check your connection and try again.',
+      {
+        cause: error,
+      }
+    )
+  }
 
   if (response.status !== 401) {
     return response
@@ -107,7 +183,7 @@ export async function authenticatedFetch(
     const refreshedSession = await refreshSession(session.refreshToken)
     localStorage.setItem(sessionStorageKey, JSON.stringify(refreshedSession))
 
-    return fetch(`${API_URL}${path}`, {
+    return fetchWithTimeout(`${API_URL}${path}`, {
       ...options,
       headers: {
         ...options.headers,

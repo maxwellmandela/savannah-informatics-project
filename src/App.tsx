@@ -106,7 +106,7 @@ function LoginPage() {
         )}
 
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Signing in...' : 'Sign in'}
+          {isSubmitting ? 'Signing in...' : error ? 'Try again' : 'Sign in'}
         </button>
       </form>
     </section>

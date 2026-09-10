@@ -6,24 +6,25 @@ Staff can sign in, browse the product catalogue, search and filter stock, sort r
 
 The application is designed for ward tablets and unreliable connections. Core workflows remain clear while data is loading, when a request fails, and when a session expires.
 
-## Planned Stack
+## Stack
 
 - React with Vite and TypeScript
 - React Router for navigation and shareable URLs
 - TanStack Query for server-state fetching, caching and invalidation
 - React Context for the authenticated session
-- Tailwind CSS and Shadcn UI for responsive, accessible interface components
+- Plain CSS for responsive layout and accessible controls
 - DummyJSON as the catalogue and authentication API
 
 ## Supported User Journeys
 
-- Sign in before accessing stock data (`expiresInMins: 1` test mode supported).
+- Sign in before accessing stock data.
 - Browse a paginated catalogue of 194 products.
 - Search by product name, filter by category and sort the results by name or ID.
 - Preserve search, filter, sort and page state in the URL so reloads and copied links restore the same list view.
 - Open an item at `/items/:id` and share that URL directly.
 - Correct the stock count from the item detail page with loading, success and recoverable error states.
 - Refresh an expired session or redirect to `/login` while preserving the original location.
+- Show a connection error and allow retrying when sign-in is slow or unavailable.
 
 ## Technical Design
 
@@ -48,6 +49,8 @@ npm install
 npm run dev
 ```
 
+The API base URL is configured through `VITE_API_URL`, and `VITE_REQUEST_TIMEOUT_MS` controls how long API requests can remain pending before showing a connection error. Copy `.env.example` to `.env` for local development and update these values when needed.
+
 ## Deployment and CI/CD
 
 The application is deployed on Vercel.
@@ -63,11 +66,11 @@ GitHub Actions runs on every pull request and checks:
 - Unit tests
 - Production build
 
-A pull request cannot be merged when any required check fails. Vercel automatically deploys the latest commit after it is merged into `master`.
+A pull request cannot be merged when any required check fails. Vercel automatically deploys the latest commit after it is merged into `main`.
 
 ## AI Use
 
-- **Section 1:** I used GitHub Copilot to sanity -test my initial design and compare TanStack Query with Redux. I chose TanStack Query because this project has mostly server state and does not need complex client-side state management. I made the final design and decision-log choices myself.
+- **Section 1:** I used GitHub Copilot to sanity-check my initial design and compare TanStack Query with Redux. I chose TanStack Query because this project has mostly server state and does not need complex client-side state management. I made the final design and decision-log choices myself.
 
 - **Section 2:** I used GitHub Copilot for Vite scaffolding, repetitive React and TypeScript code, authentication, token refresh, routing, stock filtering, search, pagination, product detail and stock updates. I reviewed and tested the generated code, including fixing a type-only import error and ensuring product requests also use the refresh path.
 
@@ -79,10 +82,10 @@ A pull request cannot be merged when any required check fails. Vercel automatica
 
 2. **Tools and workflow:** I used GitHub Copilot in VS Code. I wrote the design first, implemented one feature at a time, checked the result in the browser, and used ESLint, Prettier and tests to catch problems early. I did not use a separate spec-driven development or agent workflow framework.
 
-3. **An incomplete suggestion:** The first product requests used the access token directly, while the refresh logic was only used by the manual session check. I noticed this meant a product request could still fail after the access token expired. I fixed it by creating one authenticated request helper that refreshes after a `401` and retries the original request once. I also caught a type-only import problem when Vite reported that `AuthUser` was not a runtime export.
+3. **An incomplete suggestion:** The first product requests used the access token directly, while the refresh logic was only used by the manual session check. I noticed this meant a product request could still fail after the access token expired. I fixed it by creating one authenticated request helper that refreshes after a `401` and retries the original request once.
 
 4. **Decisions I made without AI:** I chose React with Vite instead of Next.js because this is a client-side internal console and I wanted a simple project that I could understand. I also chose to store the access and refresh tokens in `localStorage` for this browser-only assessment because the session needs to survive a reload and there is no backend available for HTTP-only cookies. I documented the security trade-off.
 
 5. **The part I would find hardest to defend:** The authenticated request helper and refresh flow are the parts I would currently find hardest to explain in depth. They involve retrying an original request, replacing tokens and handling failed refreshes. I have read through the code and added tests for the main paths, but I would spend more time improving my understanding and adding a concurrency test before calling this production-ready.
 
-**Time spent:** About 9 hours overall across 2 days since receiving the assignment on 7 September at 4:00 PM.
+**Time spent:** About 10 hours overall across 3 days since receiving the assignment on 7th September at 4:00 PM.
